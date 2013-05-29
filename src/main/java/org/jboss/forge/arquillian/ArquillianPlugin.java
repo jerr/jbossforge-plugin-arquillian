@@ -21,6 +21,10 @@ import org.jboss.forge.arquillian.container.Configuration;
 import org.jboss.forge.arquillian.container.Container;
 import org.jboss.forge.arquillian.container.ContainerDirectoryParser;
 import org.jboss.forge.arquillian.container.ContainerType;
+import org.jboss.forge.arquillian.extension.Extension;
+import org.jboss.forge.arquillian.extension.ExtensionCommandCompleter;
+import org.jboss.forge.arquillian.extension.ExtensionInstaller;
+import org.jboss.forge.arquillian.extension.ExtensionType;
 import org.jboss.forge.maven.MavenCoreFacet;
 import org.jboss.forge.parser.JavaParser;
 import org.jboss.forge.parser.java.JavaClass;
@@ -109,6 +113,9 @@ public class ArquillianPlugin implements Plugin {
     @Any
     Event<ContainerInstallEvent> installEvent;
 
+    @Inject
+    ExtensionInstaller extensionInstaller;    
+    
     @SetupCommand
     public void installContainer(
             @Option(name = OPTION_CONTAINER_TYPE, required = true, completer = ContainerTypeCommandCompleter.class) ContainerType containerType,
@@ -367,5 +374,11 @@ public class ArquillianPlugin implements Plugin {
     private DependencyBuilder createTestNgArquillianDependency() {
         return DependencyBuilder.create().setGroupId("org.jboss.arquillian.testng")
                 .setArtifactId("arquillian-testng-container").setScopeType(ScopeType.TEST);
+    }
+    
+    @Command(value = "add-extension")
+    public void addExtension(
+            @Option(name = "extension", required = true, completer = ExtensionCommandCompleter.class) String  extension) {
+       extensionInstaller.installExtension(ExtensionType.valueOf(ExtensionType.class, extension).getExtension(beanManager));       
     }
 }
